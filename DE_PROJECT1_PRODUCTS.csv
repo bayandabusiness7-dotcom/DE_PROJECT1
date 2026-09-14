@@ -1,0 +1,21 @@
+PRODUCT_ID,PRODUCT_NAME,CATEGORY,UNIT_PRICE
+P001,Bluetooth Speaker,Electronics,1088
+P002,Wireless Earbuds,Electronics,586
+P003,Power Bank,Electronics,358
+P004,USB-C Cable,Electronics,152
+P005,Smart Watch,Electronics,104
+P006,Coffee Mug,Home,700
+P007,Throw Blanket,Home,739
+P008,Desk Lamp,Home,88
+P009,Storage Box,Home,873
+P010,Kitchen Scale,Home,146
+P011,Sneakers,Fashion,155
+P012,Denim Jacket,Fashion,115
+P013,Backpack,Fashion,450
+P014,Sunglasses,Fashion,656
+P015,Cap,Fashion,392
+P016,Shampoo,Beauty,624
+P017,Moisturizer,Beauty,684
+P018,Perfume,Beauty,890
+P019,Lip Balm,Beauty,1068
+P020,Face Mask,Beauty,725
