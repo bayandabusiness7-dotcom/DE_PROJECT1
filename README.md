@@ -1,80 +1,101 @@
 # DE_PROJECT1
-# Data Engineering Project 1
+# Kasi Mart — Data Engineering Project 1
 
-**Platform: Snowflake only.** Work done in any other tool will not be marked.
+A small end-to-end data engineering exercise built on Snowflake: loading a retail dataset (customers, products, orders) into a database, then writing SQL to answer core business questions about revenue and customer spend.
 
-## Data provided
+## Business Context
 
-| File | Rows | Columns | Role |
-|---|---|---|---|
-| customers.csv | 50 | customer_id, customer_name, email, province, signup_date | Dimension |
-| products.csv | 20 | product_id, product_name, category, unit_price | Dimension |
-| orders.csv | 150 | order_id, customer_id, product_id, order_date, quantity | Fact |
+Kasi Mart is a fictional South African retailer selling products across four categories: **Electronics, Home, Fashion, and Beauty**. This project simulates loading their operational data into a cloud data warehouse (Snowflake) and running analytical queries to understand revenue drivers and top customers.
 
-Do not edit the source CSVs.
+## Datasets
 
-## Data model
+Three CSV files were provided and loaded into Snowflake as tables:
 
-```mermaid
-erDiagram
-    CUSTOMERS ||--o{ ORDERS : places
-    PRODUCTS ||--o{ ORDERS : contains
+| File | Rows | Description |
+|---|---|---|
+| `customers.csv` | 50 | Customer ID, name, email, province, signup date |
+| `products.csv` | 20 | Product ID, name, category, unit price |
+| `orders.csv` | 150 | Order ID, customer ID, product ID, order date, quantity |
 
-    CUSTOMERS {
-        string customer_id PK
-        string customer_name
-        string email
-        string province
-        date signup_date
-    }
-    PRODUCTS {
-        string product_id PK
-        string product_name
-        string category
-        number unit_price
-    }
-    ORDERS {
-        string order_id PK
-        string customer_id FK
-        string product_id FK
-        date order_date
-        number quantity
-    }
+## Repository Structure
+
+```
+kasi-mart-data-engineering/
+├── README.md
+├── data/
+│   ├── DE_PROJECT1_CUSTOMERS.csv
+│   ├── DE_PROJECT1_PRODUCTS.csv
+│   └── DE_PROJECT1_ORDERS.csv
+├── sql/
+│   ├── kasi_mart_load_statements.sql   -- table creation + data load
+│   └── kasi_mart_queries.sql           -- the four analytical queries
+├── results/
+│   ├── QUERY_1.csv
+│   ├── QUERY_2.csv
+│   ├── QUERY_3.csv
+│   └── QUERY_4.csv
+└── screenshots/
+    └── snowflake_database_schema_tables.png
 ```
 
-## What you need to do
+## Setup in Snowflake
 
-1. Create a database and schema in Snowflake for this project. Name it clearly, for example `DE_PROJECT1`.
-2. Load all three CSVs into Snowflake tables. Use correct data types per column, not VARCHAR for everything.
-3. Confirm your load. Run `SELECT COUNT(*)` on each table and check: customers = 50, products = 20, orders = 150.
-4. Write and run these four queries, and keep the SQL for each:
-   - Every order joined to customer name, product name, category, and a calculated `line_revenue` (quantity times unit_price).
-   - Total revenue per customer.
-   - Total revenue per product category.
-   - Top 5 customers by total spend.
-5. Write one short paragraph per query explaining what it shows and why it matters.
+1. Created a database `DE_PROJECT1` and schema `DBO`.
+2. Created three tables — `customers`, `products`, `orders` — matching the CSV structures.
+3. Loaded data using `INSERT INTO` statements (see `sql/kasi_mart_load_statements.sql`).
+4. Verified row counts and table sizes in Snowflake's Database Explorer:
 
-## What gets marked
+   | Table | Rows | Size |
+   |---|---|---|
+   | CUSTOMERS | 50 | 2.5 KB |
+   | ORDERS | 150 | 2.5 KB |
+   | PRODUCTS | 20 | 1.5 KB |
 
-| Item | Points |
+## Queries & Results
+
+All four required queries are in `sql/kasi_mart_queries.sql`. Full result sets are in `/results`.
+
+### 1. Orders joined to customer, product, category, and line revenue
+Joins `orders` to `customers` and `products`, adding a calculated `line_revenue` (`quantity × unit_price`) per order line. Returned all 150 orders with no orphaned rows, confirming referential integrity across the three tables.
+
+### 2. Total revenue per customer
+Aggregates line revenue by customer. 49 of the 50 customers had placed at least one order. **Nomvula Coetzee** was the highest-spending customer, with total revenue of **R11,722**.
+
+### 3. Total revenue per product category
+Aggregates line revenue by product category:
+
+| Category | Total Revenue |
 |---|---|
-| Database and tables created in Snowflake, correct types | 20 |
-| Successful load, row counts confirmed | 15 |
-| Query 1: order detail join | 15 |
-| Query 2: revenue per customer | 15 |
-| Query 3: revenue per category | 15 |
-| Query 4: top 5 customers | 10 |
-| Write-up quality (clear, correct, ties back to the data) | 10 |
-| **Total** | **100** |
+| Beauty | R87,081 |
+| Home | R72,904 |
+| Fashion | R49,800 |
+| Electronics | R47,562 |
 
-## What to submit
+Beauty and Home are the strongest revenue-driving categories.
 
-- Screenshot of your Snowflake database, schema, and tables
-- The load statements you used (COPY INTO or equivalent)
-- A `.sql` file with all four queries
-- Results for each query (screenshot or CSV export)
-- Your write-up paragraphs
+### 4. Top 5 customers by total spend
+Ranks all customers by total spend and limits to the top 5:
 
-**Deadline: 14 September 2026.** Late work without prior arrangement is not marked.
+| Rank | Customer | Total Spend |
+|---|---|---|
+| 1 | Nomvula Coetzee | R11,722 |
+| 2 | Karabo Nkosi | R11,004 |
+| 3 | Naledi Ndlovu | R10,691 |
+| 4 | Fatima Sithole | R9,116 |
+| 5 | Michael Els | R8,968 |
 
-This is Project 1. It feeds directly into the capstone (`BrightLearn_Snowflake_Capstone.md`), which assumes you can already load and join data in Snowflake on your own.
+## Key Takeaways
+
+- Beauty and Home products generate the most revenue for Kasi Mart, together accounting for well over half of total sales.
+- Nomvula Coetzee is the store's top customer by spend, and appears consistently at #1 in both the per-customer revenue and top-5 rankings — a strong candidate for a loyalty or retention program.
+- One customer (out of 50) had never placed an order, which could be worth flagging for a re-engagement campaign.
+
+## Tech Stack
+
+- **Snowflake** — data warehouse, table storage, SQL execution
+- **SQL** — joins, aggregations, ranking queries
+- **GitHub** — version control and submission
+
+## Author
+
+Data Engineering Project 1 submission.
